@@ -1,0 +1,29 @@
+﻿Model,Hyperparameter search space / configuration,Search strategy / notes
+"SARIMA
+(StatsForecast AutoARIMA)","season_length = 23; approximation = True (all candidates)
+Candidate 1 (small): max_p=2, max_q=2, max_P=1, max_Q=1, max_order=4
+Candidate 2 (medium): max_p=3, max_q=3, max_P=1, max_Q=1, max_order=5
+Candidate 3 (broad): max_p=4, max_q=4, max_P=2, max_Q=2, max_order=6","Three prespecified configurations; the broad candidate had the lowest tuning RMSE.
+Time-series CV: 5 windows, horizon=23, step_size=24, refit=True."
+XGBoost,"n_estimators: 300-1200 (step 100)
+learning_rate: 0.01-0.10 (log scale)
+max_depth: 3-8; min_child_weight: 1-15
+subsample: 0.70-1.00; colsample_bytree: 0.70-1.00
+gamma: 0.0-1.0
+reg_alpha: 1e-8-1.0 (log scale)
+reg_lambda: 1.0-10.0 (log scale)","Optuna, 100 trials; minimize RMSE on the final 20% of the training segment (chronological validation tail).
+Fixed settings: objective=reg:squarederror, random_state=42, tree_method=hist, n_jobs=-1."
+"Gradient Boosting
+(sklearn)","n_estimators: 100-800 (step 50)
+learning_rate: 0.01-0.20 (log scale); max_depth: 2-8
+min_samples_split: 2-30; min_samples_leaf: 1-20
+subsample: 0.60-1.00
+max_features: {None, sqrt, log2}
+loss: {squared_error, huber}","Optuna, 100 trials; minimize RMSE on the final 20% of the training segment (chronological validation tail).
+random_state=42 is fixed, not tuned."
+"ANN
+(Residual ANN)","No search ranges or tuning run are recorded. Fixed configuration reported:
+hidden_layers = [256, 256, 128, 64, 32]; activation = GELU
+optimizer = AdamW; learning_rate = 0.001; weight_decay = 1e-5
+loss = MSELoss; batch_size = 256; epochs = 300; shuffle = False","Fixed configuration from the final-model record; do not interpret these values as searched ranges.
+Input width=6; gradient clipping and ReduceLROnPlateau are also used."
