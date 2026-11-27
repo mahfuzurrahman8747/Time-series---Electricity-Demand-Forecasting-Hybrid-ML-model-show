@@ -116,7 +116,7 @@ Sort by timestamp before lag construction. Remove initial lag-null rows. The met
 
 ### 4.1 Run `Hyperparameter_tuning_of_models.ipynb`
 
-Update machine-specific data paths before running. The notebook currently references a CSV under `5_model`; point it to `7_model/cleaned_min_hours_23.csv`.
+Update machine-specific data paths before running. In this folder, load `cleaned_min_hours_23.csv` directly.
 
 ### 4.2 AutoARIMA
 
@@ -199,9 +199,9 @@ Optional diagnostics include stress-period and load-shedding analysis. Keep thes
 
 | Experiment | Lowest-MAE model | MAE (MW) | RMSE (MW) | R² |
 |---:|---|---:|---:|---:|
-| 1 | ANN | 185.881 | 312.974 | 0.9792 |
-| 2 | ANN | 170.954 | 248.446 | 0.9871 |
-| 3 | ANN | 167.569 | 239.127 | 0.9884 |
+| 1 | ANN | 175.583 | 306.265 | 0.9801 |
+| 2 | ANN | 173.363 | 249.468 | 0.9870 |
+| 3 | ANN | 168.763 | 239.343 | 0.9884 |
 
 The complete ranking and bias values are in `model_results_top.csv`. The same model is not always tested on the same dates across experiments, so do not compare a metric from two experiments without noting the period.
 

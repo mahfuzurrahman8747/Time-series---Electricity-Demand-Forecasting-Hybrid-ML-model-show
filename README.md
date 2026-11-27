@@ -6,7 +6,7 @@
 
 This project develops and evaluates hourly electricity-demand forecasts for Bangladesh by integrating national electricity-system observations with division-level meteorological data. The study compares an exogenous StatsForecast AutoARIMA model, Gradient Boosting, XGBoost, and a residual artificial neural network (ANN). Predictor variables include cyclic hour-of-day indicators, mean temperature, mean wind speed, and demand lags of one and 23 rows. Model performance is assessed using three chronological six-month holdout periods rather than random train-test sampling.
 
-Across the final saved results, the ANN achieved the lowest MAE in all three experiments: 185.881 MW for 2023, 170.954 MW for 2024, and 167.569 MW for 2025. The corresponding RMSE values were 312.974 MW, 248.446 MW, and 239.127 MW, while R² ranged from 0.9792 to 0.9884. Results should be interpreted as period-specific out-of-sample estimates. They demonstrate performance on the available data and do not establish causal relationships or guarantee future forecasting accuracy.
+Across the saved seed-0 holdout results, the residual ANN achieved the lowest MAE in all three experiments: 175.583 MW for 2023, 173.363 MW for 2024, and 168.763 MW for 2025. The corresponding RMSE values were 306.265 MW, 249.468 MW, and 239.343 MW, while R² ranged from 0.9801 to 0.9884. The ANN also outperformed persistence and seasonal-naive baselines in every test window. Results are period-specific out-of-sample estimates and do not establish causality or guarantee future accuracy.
 
 **Keywords:** electricity demand; time-series forecasting; Bangladesh; load shedding; weather variables; AutoARIMA; XGBoost; gradient boosting; artificial neural network
 
@@ -34,7 +34,7 @@ The EDA notebook describes the electricity-system source as a Mendeley dataset c
 
 ### 2.2 Weather data
 
-Hourly weather observations were obtained for Dhaka, Chattogram, Rajshahi, Khulna, Sylhet, and Barishal through Meteostat for 2020-01-01 through 2025-12-31. For each timestamp, temperature and wind speed were averaged across the six available regional series. The resulting variables are `temp_mean` and `wspd_mean`.
+Hourly weather observations were obtained for Dhaka, Chattogram, Rajshahi, Khulna, Sylhet, and Barishal through Meteostat for 2020-01-01 through 2025-12-31. Meteostat wind speed is stored in km/h. For each timestamp, temperature and wind speed were averaged across the six available regional series. The resulting variables are `temp_mean` and `wspd_mean`.
 
 | Location | Meteostat station |
 |---|---:|
@@ -66,7 +66,7 @@ The EDA notebook applies the following screening rules:
 - demand below 3,500 MW is removed;
 - demand above 20,000 MW is removed;
 - load shedding above 1,500 MW is removed;
-- mean wind speed above 30 m/s is removed;
+- mean wind speed above 30 km/h is removed;
 - modeling days must contain at least 23 observations.
 
 These thresholds are data-specific screening rules in the notebook, not general or meteorological severity thresholds.
@@ -208,20 +208,51 @@ The following values are direct results in `model_results_top.csv`.
 
 | Experiment | Test period | Model | MAE (MW) | RMSE (MW) | MAPE (%) | R² | Bias (MW) |
 |---:|---|---|---:|---:|---:|---:|---:|
-| 1 | 2023-07-01–2023-12-31 | ANN | 185.881 | 312.974 | 1.764 | 0.9792 | 43.690 |
+| 1 | 2023-07-01–2023-12-31 | ANN | 175.583 | 306.265 | 1.676 | 0.9801 | 5.680 |
 | 1 | 2023-07-01–2023-12-31 | Gradient Boosting | 189.379 | 321.323 | 1.800 | 0.9781 | 24.798 |
-| 1 | 2023-07-01–2023-12-31 | XGBoost | 198.268 | 333.308 | 1.878 | 0.9764 | 39.874 |
+| 1 | 2023-07-01–2023-12-31 | XGBoost | 198.640 | 333.844 | 1.881 | 0.9764 | 39.199 |
 | 1 | 2023-07-01–2023-12-31 | SARIMA | 322.658 | 502.374 | 3.126 | 0.9465 | 101.912 |
-| 2 | 2024-07-01–2024-12-31 | ANN | 170.954 | 248.446 | 1.550 | 0.9871 | 2.201 |
+| 2 | 2024-07-01–2024-12-31 | ANN | 173.363 | 249.468 | 1.562 | 0.9870 | 15.724 |
 | 2 | 2024-07-01–2024-12-31 | Gradient Boosting | 182.289 | 265.745 | 1.645 | 0.9853 | 22.860 |
-| 2 | 2024-07-01–2024-12-31 | XGBoost | 190.031 | 270.667 | 1.712 | 0.9847 | 26.884 |
+| 2 | 2024-07-01–2024-12-31 | XGBoost | 189.007 | 269.251 | 1.705 | 0.9849 | 28.081 |
 | 2 | 2024-07-01–2024-12-31 | SARIMA | 404.006 | 552.116 | 3.858 | 0.9364 | -9.799 |
-| 3 | 2025-07-01–2025-12-31 | ANN | 167.569 | 239.127 | 1.414 | 0.9884 | 14.426 |
+| 3 | 2025-07-01–2025-12-31 | ANN | 168.763 | 239.343 | 1.426 | 0.9884 | 13.667 |
 | 3 | 2025-07-01–2025-12-31 | Gradient Boosting | 181.464 | 266.434 | 1.534 | 0.9856 | 28.389 |
-| 3 | 2025-07-01–2025-12-31 | XGBoost | 191.340 | 276.457 | 1.616 | 0.9845 | 44.421 |
+| 3 | 2025-07-01–2025-12-31 | XGBoost | 192.080 | 276.982 | 1.622 | 0.9844 | 44.795 |
 | 3 | 2025-07-01–2025-12-31 | SARIMA | 389.011 | 562.181 | 3.548 | 0.9358 | -161.335 |
 
-### 7.1 Comparative figures
+### 7.4 Comparative figures
+
+### 7.1 Key findings
+
+1. **The residual ANN is consistently the best model by MAE**, with 175.583 MW, 173.363 MW, and 168.763 MW in the 2023, 2024, and 2025 test windows.
+2. **Performance improves over time**, with ANN RMSE decreasing from 306.265 MW to 239.343 MW and R² increasing from 0.9801 to 0.9884.
+3. **Gradient Boosting is the strongest tree-based alternative**, ranking second in every experiment.
+4. **Both simple baselines are substantially weaker** than the four learned models. Persistence MAE ranges from 358.902 to 367.557 MW, while seasonal-naive MAE ranges from 584.392 to 668.592 MW.
+5. **Extreme conditions remain difficult**: in the 2025 test, the rapid-demand-rise subset produced 492.482 MW MAE for the ANN and 580.369 MW for Gradient Boosting.
+
+### 7.2 Baseline comparison
+
+| Experiment | Persistence MAE (MW) | Persistence RMSE (MW) | Seasonal-naive MAE (MW) | Seasonal-naive RMSE (MW) |
+|---:|---:|---:|---:|---:|
+| 1 | 361.380 | 527.910 | 598.303 | 868.797 |
+| 2 | 358.902 | 483.602 | 668.592 | 939.536 |
+| 3 | 367.557 | 494.236 | 584.392 | 803.570 |
+
+### 7.3 Stress-period evidence
+
+For the 2025 holdout, the ANN has the lowest MAE overall (168.763 MW) and on the peak-demand subset (183.785 MW). It also records the smallest peak-demand mean shortfall at 136.742 MW, compared with 147.780 MW for Gradient Boosting and 164.740 MW for XGBoost.
+
+| 2025 subset | ANN MAE (MW) | Gradient Boosting MAE (MW) | XGBoost MAE (MW) | SARIMA MAE (MW) |
+|---|---:|---:|---:|---:|
+| All test observations | 168.763 | 181.464 | 192.080 | 389.011 |
+| Peak demand (N=861) | 183.785 | 201.667 | 221.739 | 298.211 |
+| Rapid demand rise (N=97) | 492.482 | 580.369 | 627.856 | 1,036.225 |
+| Rapid demand fall (N=49) | 566.596 | 623.396 | 615.790 | 820.476 |
+| Hot-weather proxy (N=102) | 188.676 | 189.504 | 189.600 | 204.893 |
+| Load-shedding observations (N=1,302) | 177.743 | 194.987 | 210.735 | 313.662 |
+
+These stress metrics are diagnostic and should not be interpreted as independent validation experiments.
 
 ![MAE comparison](paper_figures/Fig7A_MAE_comparison.png)
 
@@ -315,7 +346,7 @@ Run the following notebooks from this directory:
 3. `final_model.ipynb`
 4. `Publication-quality.ipynb`
 
-Several cells contain machine-specific absolute paths. Update them to the current raw data locations before rerunning. The tuning notebook is also known to contain a hard-coded `5_model` input path; change it to `cleaned_min_hours_23.csv` in this directory.
+Several cells contain machine-specific absolute paths. Update them to the current raw data locations before rerunning. Use `cleaned_min_hours_23.csv` in this directory for the tuning and final model workflows.
 
 ### Optional Streamlit interface
 
